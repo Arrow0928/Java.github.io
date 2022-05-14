@@ -1,2 +1,7 @@
 @Slf4j     /*控制台输出日志  log 日志*/
+
  dto(Data Transfer Object即数据传输对象) 封装不止包含实体的数据
+
+ 对象拷贝（除"record"属性)BeanUtils.copyProperties(pageInfo,dishDtoPage,"records");
+ 
+ XXXDto 继承实体，用来封装实体不存在的属性。
