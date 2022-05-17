@@ -5,3 +5,8 @@
  对象拷贝（除"record"属性)BeanUtils.copyProperties(pageInfo,dishDtoPage,"records");
  
  XXXDto 继承实体，用来封装实体不存在的属性。
+
+
+redis 基于内存的数据库
+
+redis Springboot 默认配置RedisTemplate 直接 @Autowired 
