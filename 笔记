@@ -39,7 +39,7 @@ redis 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
 比如说我们是一个用户系统，那么当一个请求进来的时候，一个线程会负责执行这个请求，然后这个请求就会依次调用service-1()、service-2()、service-3()、service-4()，这4个方法可能是分布在不同的类中的。这个例子和存储session有些像。
 
  redis 验证码
-    拦截器 
+    拦截器 （解决访问非登录页面刷新问题）
       第一层拦截一切刷新有效期1.获取token 2.查询redis的用户3.保存到threadlocal 4.刷新token有效期5.放行
       第二层拦截需要登录的路径 1.查询threadlocal的用户 1.不存在则拦截
 自己创建的类里，不能对对象进行依赖注入
