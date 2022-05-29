@@ -10,3 +10,18 @@
 redis 基于内存的数据库
 
 redis Springboot 默认配置RedisTemplate 直接 @Autowired 
+
+用户禁止cookie后，如何继续使用session
+
+
+    (1)如果用户禁止cookie，服务器仍会将sessionId以cookie的方式发送给浏览器，但是，浏览器不再保存这个cookie(即sessionId)了。
+
+    (2)如果想继续使用session，需要采取其他方式来实现sessionId的跟踪。
+
+        可以使用url重写来实现sessionId的跟踪。
+
+    (3)url重写
+
+        a,什么是URL重写
+
+ 
