@@ -24,4 +24,21 @@ redis Springboot 默认配置RedisTemplate 直接 @Autowired
 
         a,什么是URL重写
 
- 
+
+
+redis 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
+   用每建立一个session 都会在用户的cookie存入一个sessionid
+   token为key 保存用户信息 返回token到前端，保存到前端浏览器，登录凭证，以后每次axios请求携带token
+   token 登录密码校验-》生成token,登录外的其他接口访问，token校验
+   每个线程内需要保存类似于全局变量的信息（例如在拦截器中获取的用户信息），可以让不同方法直接使用，避免参数传递的麻烦却不想被多线程共享（因为不同线程获取到的用户信息不一样）。
+   保存登录的用户信息，1. String 结构的json  直观  2.hash结构  将对象的每个字段独立存储，可以对单个字段作crud,并且内存占用小
+例如，用 ThreadLocal 保存一些业务内容（用户权限信息、从用户系统获取到的用户名、用户ID 等），这些信息在同一个线程内相同，但是不同的线程使用的业务内容是不相同的。
+
+在线程生命周期内，都通过这个静态 ThreadLocal 实例的 get() 方法取得自己 set 过的那个对象，避免了将这个对象（如 user 对象）作为参数传递的麻烦。
+
+比如说我们是一个用户系统，那么当一个请求进来的时候，一个线程会负责执行这个请求，然后这个请求就会依次调用service-1()、service-2()、service-3()、service-4()，这4个方法可能是分布在不同的类中的。这个例子和存储session有些像。
+
+ redis 验证码
+    拦截器
+
+自己创建的类里，不能对对象进行依赖注入
