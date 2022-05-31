@@ -75,7 +75,7 @@ redis 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
 
       
   操作缓存   删除缓存还是更新   
-          更新缓存：没次更新数据库都更新缓存，无效写操作比较多
+          更新缓存：没次更新数据库都更新缓存，无效写操作比较多容易产生线程安全问题
       用  删除缓存：更新数据库时让缓存失效，查询时更新缓存
       先操作数据库，后删除缓存  https://www.bilibili.com/video/BV1cr4y1671t?p=38
       redis失效->查询缓存未命中查数据库->
@@ -95,5 +95,86 @@ redis 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
 可能造成短期的不- -致
 方法二 布隆过滤  （加一层）
 自己创建的类里，不能对对象进行依赖注入
+
+RDB
+bgsave开始时会fork主进程得到子进程，子进程共享主进程的内存数据。完成fork后读取内存数据并写入RDB文件。（异步）
+fork采用的是copy-on-write技术:
+●当主进程执行读操作时， 访问共享内存;
+●当主进程执行写操作时， 则会拷贝- -份数据，执行写操作。
+RDB方式bgsave的基本流程?
+. fork主进程得到一个子进程，共享内存空间
+●子进程读取内存数据并写入新的RDB文件
+●用新RDB文件替换旧的RDB文件。
+RDB会在什么时候执行? save 60 1000代表什么含义?
+●默认是服务停止时。
+●代表60秒内至少执行1000次修改则触发RDB
+RDB的缺点?
+●RDB执行间隔时间长，两次RDB之间写入数据有丢失的风险
+●fork子进程、压缩、写出RDB文件都比较耗时
+
+redis集群同机器三端口/不同机器直接三实例
+
+
+数据同步原理
+master如何判断slave是不是第一次来同步数据? 这里会用到两个很重要的概念:
+●Replication ld:简称replid, 是数据集的标记，id- 致则说明是同一数据集。每一个master都有唯一 的replid,
+slave则会继承master节点的replid
+●offset: 偏移量，随着记录在repl baklog中的数据增多而逐渐增大。slave完成同步时也会记录当前同步的ffset。
+如果slave的offset小于master的offset,说明slave数据落后于master,需要更新。
+因此slave做数据同步，必须向master声明自己的replication id和offset, master才可以判断到底需要同步哪些数据
+第一次全量同步，但如果slave重启后同步，则执行增量同步
+找不到offset增量同步
+
+Sentinel（哨兵）基于心跳机制监测服务状态，每隔1秒向集群的每个实例发送ping命令:
+●主观下线: 如果某sentinel节 点发现某实例未在规定时间响应，则认为该实例主观下线。
+●客观下线:若超过指定数量(quorum)的sentinel都认为该实例主观下线，则该实例客观下线。quorum值最好超
+过Sentinel实例数量的一半。
+ 选举master
+ 选举新的master
+   一旦发现master故障，sentinel需 要在salve中选择-一个作 为新的master,选择依据是这样的:
+   ●首先会判断slave节点与master节点断开时间长短，如果超过指定值(down-afer-milliseconds * 10)则会排除该
+   slave节点
+   ●然后判断slave节 点的slave-priority值，越小优先级越高，如果是0则永不参与选举
+   ●如果slave-prority- 样,则判断slave节 点的ffset值，越大说明数据越新，优先级越高
+   ●最后是判断slave节 点的运行id大小，越小优先级越高。
+
+1、为什么有跨域问题？
+跨域不一定都会有跨域问题。
+因为跨域问题是浏览器对于ajax请求的一种安全限制：一个页面发起的ajax请求，只能是与当前页域名相同的路径**，这能有效的阻止跨站攻击。
+因此：跨域问题 是针对ajax的一种限制。
+
+2、一般的解决方式CORS
+CORS是一个W3C标准，全称是"跨域资源共享"（Cross-origin resource sharing）。它允许浏览器向跨源服务器，发出XMLHttpRequest请求，从而克服了AJAX只能同源使用的限制。CORS需要浏览器和服务器同时支持。目前，所有浏览器都支持该功能，IE浏览器不能低于IE10。
+
+浏览器端：
+目前，所有浏览器都支持该功能（IE10以下不行）。整个CORS通信过程，都是浏览器自动完成，不需要用户参与。
+
+服务端：
+CORS通信与AJAX没有任何差别，因此你不需要改变以前的业务逻辑。只不过，浏览器会在请求中携带一些头信息，我们需要以此判断是否允许其跨域，然后在响应头中加入一些信息即可。这一般通过过滤器完成即可。
+
+3、SpringBoot具体解决方式
+a)全局配置一个config
+@Configuration
+public class CorsConfig {
+    private CorsConfiguration buildConfig() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.addAllowedOrigin("*"); // 1允许任何域名使用
+        corsConfiguration.addAllowedHeader("*"); // 2允许任何头
+        corsConfiguration.addAllowedMethod("*"); // 3允许任何方法（post、get等）
+        return corsConfiguration;
+    }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", buildConfig()); // 4
+        return new CorsFilter(source);
+    }
+}
+
+跨域
+   同源策略：协议，域名，端口都相统
+   CORS协议    配置一个config类   Con
+
 
 
