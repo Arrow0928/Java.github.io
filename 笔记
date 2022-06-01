@@ -26,7 +26,7 @@ redis Springboot 默认配置RedisTemplate 直接 @Autowired
 
 
 
-redis 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
+redis 单点登录，登录一个其他系统也不用登录淘宝天猫 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
    用每建立一个session 都会在用户的cookie存入一个sessionid
    token为key 保存用户信息 返回token到前端，保存到前端浏览器，登录凭证，以后每次axios请求携带token
    token 登录密码校验-》生成token,登录外的其他接口访问，token校验
