@@ -26,9 +26,9 @@ redis Springboot 默认配置RedisTemplate 直接 @Autowired
 
 
 
-redis 单点登录，登录一个其他系统也不用登录淘宝天猫 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
+redis 登录一个其他系统也不用登录淘宝天猫 实现共享session  https://www.bilibili.com/video/BV1cr4y1671t?p=32
    用每建立一个session 都会在用户的cookie存入一个sessionid
-   token为key 保存用户信息 返回token到前端，保存到前端浏览器，登录凭证，以后每次axios请求携带token
+   token为key 保存用户信息 返回token到前端，保存到前端浏览器，登录凭证，以后每次axios请求携带token uuid
    token 登录密码校验-》生成token,登录外的其他接口访问，token校验
    每个线程内需要保存类似于全局变量的信息（例如在拦截器中获取的用户信息），可以让不同方法直接使用，避免参数传递的麻烦却不想被多线程共享（因为不同线程获取到的用户信息不一样）。
    保存登录的用户信息，1. String 结构的json  直观  2.hash结构  将对象的每个字段独立存储，可以对单个字段作crud,并且内存占用小
@@ -140,7 +140,7 @@ Sentinel（哨兵）基于心跳机制监测服务状态，每隔1秒向集群�
 
 1、为什么有跨域问题？
 跨域不一定都会有跨域问题。
-因为跨域问题是浏览器对于ajax请求的一种安全限制：一个页面发起的ajax请求，只能是与当前页域名相同的路径**，这能有效的阻止跨站攻击。
+因为跨域问题是浏览器对于ajax/axios请求的一种安全限制：一个页面发起的ajax请求，只能是与当前页域名相同的路径**，这能有效的阻止跨站攻击。
 因此：跨域问题 是针对ajax的一种限制。
 
 2、一般的解决方式CORS
@@ -186,6 +186,7 @@ public class CorsConfig {
 乐观锁 （更新时用的）  ：版本号法  根据版本  
            cas法  库存当版本   成功率低 解决->库存大于0
 一人一单    ：
+查询订单（用户id和菜品id查是否存在）扣库存，创建订单
 synchronized给userid.toString加锁，intern（）返回字符串常量池中值相同equals的引用，保证
 应该在事务提交之后，再去释放锁，不然会出现事务没为提交，锁就释放了，其他线程就进来了，二值还没修改
 
